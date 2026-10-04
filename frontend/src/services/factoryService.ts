@@ -2,11 +2,10 @@ import { apiClient, setUsingMockData } from './api';
 import { FactoryOverview } from '../types';
 import { mockFactoryOverview } from '../data/mockData';
 
-export async function fetchFactoryOverview(factoryId?: string): Promise<FactoryOverview> {
+export async function fetchFactoryOverview(factoryId: string = 'factory_001'): Promise<FactoryOverview> {
   try {
-    const response = await apiClient.get<FactoryOverview>('/api/factory/overview', {
-      params: factoryId ? { factory_id: factoryId } : undefined,
-    });
+    const id = factoryId || 'factory_001';
+    const response = await apiClient.get<FactoryOverview>(`/api/factory/overview?factory_id=${encodeURIComponent(id)}`);
     setUsingMockData(false);
     return response.data;
   } catch (error) {

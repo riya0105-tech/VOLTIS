@@ -24,7 +24,7 @@ export function CarbonReportPage() {
   const [overview, setOverview] = useState<FactoryOverview | null>(null);
 
   useEffect(() => {
-    fetchFactoryOverview().then((res) => {
+    fetchFactoryOverview('factory_001').then((res) => {
       if (res) setOverview(res);
     });
   }, []);

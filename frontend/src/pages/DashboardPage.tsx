@@ -22,7 +22,9 @@ import {
   fetchRecommendations,
   isUsingMockData,
   subscribeMockStatus,
+  setUsingMockData,
 } from '../services';
+import { mockFactoryOverview } from '../data/mockData';
 import { KPISection } from '../components/dashboard/KPISection';
 import { EnergyDigitalTwin } from '../components/digital-twin/EnergyDigitalTwin';
 import { AIAlertsPanel } from '../components/alerts/AIAlertsPanel';
@@ -52,7 +54,7 @@ export function DashboardPage() {
     try {
       const [overviewData, machinesData, energyPoints, alertsData, recsData] =
         await Promise.all([
-          fetchFactoryOverview(),
+          fetchFactoryOverview('factory_001'),
           fetchMachines(),
           fetchTodayEnergy(),
           fetchAlerts(),
@@ -65,6 +67,12 @@ export function DashboardPage() {
       setAlerts(alertsData);
       setRecommendations(recsData);
       setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
+      // Successful factory overview from live backend prevents switching to Demo / Offline state
+      if (overviewData && overviewData !== mockFactoryOverview) {
+        setUsingMockData(false);
+        setIsFallback(false);
+      }
     } catch (err: unknown) {
       console.error('Failed to load dashboard data:', err);
       setError('Could not connect to live backend. Displaying demo plant telemetry.');

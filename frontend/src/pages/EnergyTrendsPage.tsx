@@ -45,7 +45,7 @@ export function EnergyTrendsPage() {
     fetchMachines().then((res) => {
       if (res && res.length > 0) setMachines(res);
     });
-    fetchFactoryOverview().then((res) => {
+    fetchFactoryOverview('factory_001').then((res) => {
       if (res) setOverview(res);
     });
   }, []);
