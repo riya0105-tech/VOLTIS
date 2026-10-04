@@ -14,12 +14,23 @@ logger = logging.getLogger("voltis.api")
 
 settings = get_settings()
 
+# Allowed CORS Origins: explicitly allow production Vercel frontend and local development origins
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "https://voltis-olive.vercel.app",
+]
+for origin in settings.cors_origins_list:
+    if origin not in allowed_origins:
+        allowed_origins.append(origin)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up VOLTIS Backend API...")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
-    logger.info(f"Configured CORS origins: {settings.cors_origins_list}")
+    logger.info(f"Configured CORS origins: {allowed_origins}")
     if check_db_connection():
         create_tables()
     yield
@@ -38,7 +49,7 @@ app = FastAPI(
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
