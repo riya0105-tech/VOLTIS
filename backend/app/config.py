@@ -21,7 +21,9 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
 
     # CORS Origins (comma-separated or list)
-    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
+    CORS_ORIGINS: str = (
+        "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,https://voltis-olive.vercel.app"
+    )
 
     # Energy & Carbon Parameters
     EMISSION_FACTOR: float = 0.82  # kg CO2 / kWh (configurable)
@@ -39,9 +41,31 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> List[str]:
-        if not self.CORS_ORIGINS:
-            return ["*"]
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        base_origins = [
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "https://voltis-olive.vercel.app",
+        ]
+        origins = list(base_origins)
+        if self.CORS_ORIGINS:
+            raw = self.CORS_ORIGINS.strip()
+            if raw.startswith("[") and raw.endswith("]"):
+                import json
+                try:
+                    items = json.loads(raw)
+                    if not isinstance(items, list):
+                        items = [raw]
+                except Exception:
+                    items = raw.strip("[]").split(",")
+            else:
+                items = raw.split(",")
+
+            for item in items:
+                cleaned = str(item).strip().strip("'\"").rstrip("/")
+                if cleaned and cleaned not in origins:
+                    origins.append(cleaned)
+        return origins
 
 
 @lru_cache()
